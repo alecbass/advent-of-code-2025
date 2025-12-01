@@ -14,66 +14,54 @@ fn main() -> Result<(), ()> {
     let mut position = 50;
     let mut times_at_zero = 0;
 
-    println!("Position: {position}");
+    // let buffer = "L1000";
 
     for line in buffer.lines() {
         let direction = line.chars().nth(0).unwrap();
         let distance = line[1..line.len()].parse::<i32>().unwrap();
 
+        // Niche cases to count here:
+        // 1. Dial starts at zero: Don't count leaving zero the first time
+        // 2. Dial ends at zero: Don't count landing on zero as a pass, because we check it later
+        // 3. Any other pass counts as passing by zero and should increment the password
+
+        // Case 1
+        // let mut ignore_first_pass = position == 0;
+
         // Times the dial passed by zero
         let mut times_passed_zero = 0;
+        let start_position = position;
 
-        // Don't cound the dial as passing by zero for the first 100 units of distance if it
-        // started here
-        let mut ignore_first_pass = position == 0;
-
+        // Rust mod is a remainder operator, 01/12/2025 worst day of my life...
         if direction == 'R' {
             position += distance;
-
-            while position > 99 {
-                // Gone past 99, wrap it around
-                position = position - 100;
-
-                if IS_PART_TWO {
-                    // It wrapped around, but don't count passing zero if it landed on zero as
-                    // we check that afterwards
-                    let is_last_iteration = position >= 0 && position < 100;
-                    if !ignore_first_pass && is_last_iteration && position != 0 {
-                        times_passed_zero += 1;
-                    }
-
-                    ignore_first_pass = false;
-                }
-            }
+            times_passed_zero = position / 100;
+            position = position.rem_euclid(100);
         } else if direction == 'L' {
             position -= distance;
+            times_passed_zero = (100 - position) / 100;
+            position = position.rem_euclid(-100);
+        }
 
-            while position < 0 {
-                // Gone under 0, wrap back over
-                position = position + 100;
-
-                if IS_PART_TWO {
-                    // It wrapped around, but don't count passing zero if it landed on zero as
-                    // we check that afterwards
-                    let is_last_iteration = position >= 0 && position < 100;
-                    if !ignore_first_pass && !is_last_iteration && position != 0 {
-                        times_passed_zero += 1;
-                    }
-
-                    ignore_first_pass = false;
-                }
-            }
+        if start_position == 0 && times_passed_zero > 0 {
+            times_passed_zero -= 1;
         }
 
         if position == 0 {
+            if times_passed_zero > 0 {
+                times_passed_zero -= 1;
+            }
+
             times_at_zero += 1;
         }
 
         // How many times the dial passed zero while spinning
-        times_at_zero += times_passed_zero;
+        if IS_PART_TWO {
+            times_at_zero += times_passed_zero;
+        }
 
         println!(
-            "{direction} {distance} Position: {position}    time passed zero: {times_passed_zero}   times at zero: {times_at_zero}"
+            "{direction} {distance} {start_position}->{position}    time passed zero: {times_passed_zero}   times at zero: {times_at_zero} END"
         );
     }
 
