@@ -1,5 +1,5 @@
 {
-  description = "Dropspot development flake";
+  description = "Advent of Code 2025 development flake";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-25.11";
