@@ -14,8 +14,6 @@ fn main() -> Result<(), ()> {
     let mut position = 50;
     let mut times_at_zero = 0;
 
-    // let buffer = "L1000";
-
     for line in buffer.lines() {
         let direction = line.chars().nth(0).unwrap();
         let distance = line[1..line.len()].parse::<i32>().unwrap();
@@ -24,9 +22,6 @@ fn main() -> Result<(), ()> {
         // 1. Dial starts at zero: Don't count leaving zero the first time
         // 2. Dial ends at zero: Don't count landing on zero as a pass, because we check it later
         // 3. Any other pass counts as passing by zero and should increment the password
-
-        // Case 1
-        // let mut ignore_first_pass = position == 0;
 
         // Times the dial passed by zero
         let mut times_passed_zero = 0;
