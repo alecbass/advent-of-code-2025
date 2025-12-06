@@ -59,4 +59,24 @@ fn main() {
             }
         }
     }
+
+    println!("Fresh ingredient count: {fresh_ingredient_count}");
+
+    let mut fresh_ingredient_ids = HashSet::<i64>::new();
+
+    for range in fresh_ingredient_ranges.iter() {
+        let (start, end) = range;
+
+        for id in *start..=*end {
+            fresh_ingredient_ids.insert(id);
+        }
+    }
+
+    println!("Fresh ingredient IDs: {fresh_ingredient_ids:?}");
+    println!(
+        "Fresh ingredient ID count: {}",
+        fresh_ingredient_ranges.len()
+    );
+
+    // Terrible part two solution: Count every single fresh ID
 }
