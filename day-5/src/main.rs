@@ -1,4 +1,4 @@
-use std::{collections::HashSet, io::Read};
+use std::{collections::HashSet, i64, io::Read};
 
 const TEST_INPUT: &str = "3-5
 10-14
@@ -64,13 +64,28 @@ fn main() {
 
     let mut fresh_ingredient_ids = HashSet::<i64>::new();
 
+    let mut min_range = i64::MAX;
+    let mut max_range = 0;
+
     for range in fresh_ingredient_ranges.iter() {
         let (start, end) = range;
 
-        for id in *start..=*end {
-            fresh_ingredient_ids.insert(id);
+        if *start < min_range {
+            min_range = *start;
         }
+
+        if *end > max_range {
+            max_range = *end;
+        }
+
+        // for id in *start..=*end {
+        //     fresh_ingredient_ids.insert(id);
+        // }
     }
+
+    let id_count = max_range - min_range;
+
+    println!("{min_range} {max_range} {id_count}");
 
     println!("Fresh ingredient IDs: {fresh_ingredient_ids:?}");
     println!(
