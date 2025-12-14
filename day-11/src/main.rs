@@ -1,8 +1,9 @@
-mod day_1;
+mod part_1;
+mod part_2;
 
 use std::fs::File;
 
-use day_1::solve;
+use part_2::solve as part_2_solve;
 
 fn main() -> Result<(), ()> {
     const FILE_PATH: &'static str = "input.txt";
@@ -11,7 +12,7 @@ fn main() -> Result<(), ()> {
         return Err(());
     };
 
-    let paths_count = solve(file)?;
+    let paths_count = part_2_solve(file)?;
     println!("{paths_count}");
     Ok(())
 }
