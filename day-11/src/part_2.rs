@@ -23,48 +23,32 @@ fn parse_line(line: &str) -> Result<DeviceAndPath, ()> {
 fn find_svr_to_out(
     graph: &HashMap<String, Vec<String>>,
     device_id: &str,
-    cumulative_path: Vec<&String>,
     contains_dac: bool, // Use a variable so we don't call Vec.contains constantly
     contains_fft: bool,
+    depth: i32,
 ) -> i32 {
+    let mut paths_count = 0;
+    let contains_dac = contains_dac || device_id == "dac";
+    let contains_fft = contains_fft || device_id == "fft";
+
+    if device_id == "out" && contains_dac && contains_fft {
+        // Found the end device, return true that previous devices are connected
+        println!("{paths_count} {device_id}");
+        return 1;
+    }
+
     let Some(connected_device_ids) = graph.get(device_id) else {
-        // Reached "out", return zero as we're at the end
+        // No path for some reason. This shouldn't be reached
         return 0;
     };
 
-    if let Some(first) = cumulative_path.first()
-        && *first != "svr"
-    {
-        // Didn't start from "svr", return
-        return 0;
-    }
-
-    let mut paths_count = 0;
-
     for connected_device_id in connected_device_ids {
-        if connected_device_id == "out" && contains_dac && contains_fft {
-            // Found the end device, return true that previous devices are connected
-            paths_count += 1;
-            println!("{connected_device_id} {cumulative_path:?}");
-            continue;
-        }
-
-        let contains_dac = contains_dac || connected_device_id == "dac";
-        let contains_fft = contains_fft || connected_device_id == "fft";
-
-        // Find if connected devices can reach the "out" device
-        let cumulative_path = cumulative_path
-            .iter()
-            .map(|id| *id)
-            .chain(vec![connected_device_id])
-            .collect::<Vec<&String>>();
-
         paths_count += find_svr_to_out(
             graph,
             connected_device_id,
-            cumulative_path,
             contains_dac,
             contains_fft,
+            depth + 1,
         );
     }
 
@@ -78,6 +62,20 @@ pub fn solve(mut input_file: File) -> Result<i32, ()> {
         return Err(());
     }
 
+    //     buffer = "svr: aaa bbb
+    // aaa: fft
+    // fft: ccc
+    // bbb: tty
+    // tty: ccc
+    // ccc: ddd eee
+    // ddd: hub
+    // hub: fff
+    // eee: dac
+    // dac: fff
+    // fff: ggg hhh
+    // ggg: out
+    // hhh: out".to_owned();
+
     for line in buffer.lines() {
         if line.is_empty() {
             continue;
@@ -87,6 +85,6 @@ pub fn solve(mut input_file: File) -> Result<i32, ()> {
         graph.insert(device_id, to_device_ids);
     }
 
-    let paths_count = find_svr_to_out(&graph, "svr", vec![&"svr".to_owned()], false, false);
+    let paths_count = find_svr_to_out(&graph, "svr", false, false, 0);
     Ok(paths_count)
 }
