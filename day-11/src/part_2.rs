@@ -23,17 +23,16 @@ fn parse_line(line: &str) -> Result<DeviceAndPath, ()> {
 fn find_svr_to_out(
     graph: &HashMap<String, Vec<String>>,
     device_id: &str,
-    cumulative_path: Vec<String>,
+    cumulative_path: Vec<&String>,
     contains_dac: bool, // Use a variable so we don't call Vec.contains constantly
     contains_fft: bool,
 ) -> i32 {
-    println!("{device_id} {cumulative_path:?} {contains_dac} {contains_fft}");
     let Some(connected_device_ids) = graph.get(device_id) else {
         // Reached "out", return zero as we're at the end
         return 0;
     };
 
-    if let Some(ref first) = cumulative_path.first()
+    if let Some(first) = cumulative_path.first()
         && *first != "svr"
     {
         // Didn't start from "svr", return
@@ -43,12 +42,10 @@ fn find_svr_to_out(
     let mut paths_count = 0;
 
     for connected_device_id in connected_device_ids {
-        if connected_device_id == "out" {
-            if contains_dac && contains_fft {
-                // Found the end device, return true that previous devices are connected
-                paths_count += 1
-            }
-
+        if connected_device_id == "out" && contains_dac && contains_fft {
+            // Found the end device, return true that previous devices are connected
+            paths_count += 1;
+            println!("{connected_device_id} {cumulative_path:?}");
             continue;
         }
 
@@ -57,10 +54,10 @@ fn find_svr_to_out(
 
         // Find if connected devices can reach the "out" device
         let cumulative_path = cumulative_path
-            .clone()
-            .into_iter()
-            .chain(vec![connected_device_id.to_owned()])
-            .collect::<Vec<String>>();
+            .iter()
+            .map(|id| *id)
+            .chain(vec![connected_device_id])
+            .collect::<Vec<&String>>();
 
         paths_count += find_svr_to_out(
             graph,
@@ -90,6 +87,6 @@ pub fn solve(mut input_file: File) -> Result<i32, ()> {
         graph.insert(device_id, to_device_ids);
     }
 
-    let paths_count = find_svr_to_out(&graph, "svr", vec!["svr".to_owned()], false, false);
+    let paths_count = find_svr_to_out(&graph, "svr", vec![&"svr".to_owned()], false, false);
     Ok(paths_count)
 }
