@@ -27,11 +27,20 @@ fn find_svr_to_out(
     contains_fft: bool,
     depth: i32,
 ) -> i32 {
+    // println!("{device_id} {} {cumulative_path:?}");
+
     let mut paths_count = 0;
     let contains_dac = contains_dac || device_id == "dac";
     let contains_fft = contains_fft || device_id == "fft";
 
-    if device_id == "out" && contains_dac && contains_fft {
+    // if device_id == "out" && contains_dac && contains_fft {
+    //     // Found the end device, return true that previous devices are connected
+    //     println!("{paths_count} {device_id}");
+    //     return 1;
+    // }
+
+    if contains_dac && contains_fft {
+        // This route passes through dac and fft, it should end at out so end looking here
         // Found the end device, return true that previous devices are connected
         println!("{paths_count} {device_id}");
         return 1;
